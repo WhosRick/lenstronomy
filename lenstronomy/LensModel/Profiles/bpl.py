@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 __all__ = ["BPL", "BPLMajorAxis"]
 
-_TINY = 1e-15  # 数值安全下限
+_TINY = 1e-15  
 
 
 class BPL(LensProfileBase):
@@ -222,11 +222,11 @@ class BPLMajorAxis(LensProfileBase):
 
     def derivatives(self, x, y, b, a, a_c, r_c, q):
         """Returns the deflection angles (alpha_x, alpha_y) with precomputation & reuse."""
-        # 基本量
+        
         x = np.asarray(x, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
         Z = (x + 1j * y).astype(np.complex128)
-        # 安全处理 Z 和 R_el
+        
         Z_safe = Z.copy()
         mask0 = (x == 0) & (y == 0)
         if np.ndim(Z_safe) == 0:
@@ -239,7 +239,7 @@ class BPLMajorAxis(LensProfileBase):
         R_el = np.sqrt(x * x * q + y * y / q).astype(np.float64)
         R_el_safe = np.maximum(R_el, _TINY)
 
-        # 预计算公用量
+        
         invZ = 1.0 / Z_safe
         invZ2 = invZ * invZ
         Beta_a = self.Beta_func(a)
@@ -251,13 +251,13 @@ class BPLMajorAxis(LensProfileBase):
         U = (1.0 / q - q) * invZ2
         U_R = U * (R_el_safe * R_el_safe)
 
-        # 超几何只算一次
+        # 
         H_a = hyp2f1(0.5, (3.0 - a) / 2.0, (5.0 - a) / 2.0, U_R)
 
-        # alpha1（EPL-like 部分）
+        # alpha1（EPL-like ）
         alpha1 = base1 * pow_a * H_a
 
-        # alpha2（core修正）
+        # alpha2（core）
         C = (r_c * r_c) * U
         F_ac = self.F((3.0 - a_c) / 2.0, C)
         F_a3 = self.F((3.0 - a) / 2.0, C)
@@ -274,7 +274,7 @@ class BPLMajorAxis(LensProfileBase):
 
     def hessian(self, x, y, b, a, a_c, r_c, q):
         """Hessian matrix (f_xx, f_xy, f_yx, f_yy) with precomputation & reuse."""
-        # 基本量
+        
         x = np.asarray(x, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
         Z = (x + 1j * y).astype(np.complex128)
@@ -293,7 +293,7 @@ class BPLMajorAxis(LensProfileBase):
 
         z2 = x * x + y * y  # |z|^2
 
-        # 预计算公用量
+        
         invZ = 1.0 / Z_safe
         invZ2 = invZ * invZ
         Beta_a = self.Beta_func(a)
@@ -310,22 +310,22 @@ class BPLMajorAxis(LensProfileBase):
         kappa2 = self.kappa2func(b, a, a_c, r_c, R_el_safe)
         kappa = np.nan_to_num(kappa1 + kappa2, posinf=1e10, neginf=-1e10)
 
-        # 预计算超几何/特殊函数
+        
         H_a = hyp2f1(0.5, (3.0 - a) / 2.0, (5.0 - a) / 2.0, U_R)
         C = (r_c * r_c) * U
         F_ac = self.F((3.0 - a_c) / 2.0, C)
         F_a3 = self.F((3.0 - a) / 2.0, C)
         S2_arr = self.S2(a, a_c, C, R_el_safe, r_c, target_precision=1e-6)
 
-        # alpha1（为 gamma1conj 用）
+        # alpha1（ gamma1conj ）
         alpha1 = base1 * pow_a * H_a
 
         # gamma1conj = (2-a)*alpha1/Z - kappa1 * Z* / Z
         gamma1conj = (2.0 - a) * (alpha1 * invZ) - kappa1 * (Z_safe.conj() * invZ)
 
-        # gamma2conj（core修正 + kappa2 相关项）
+        # gamma2conj（core + kappa2 ）
         pref_g2 = 2.0 * (r_c * r_c) * invZ2 * (3.0 - a) / Beta_a * (b / r_c) ** (a - 1.0)
-        # 分母 q*Z^2 - (1+q^2)*r_c^2
+        #  q*Z^2 - (1+q^2)*r_c^2
         denom2 = q * (Z_safe * Z_safe) - (1.0 + q * q) * (r_c * r_c)
         if np.ndim(denom2) == 0:
             if np.abs(denom2) == 0.0:
@@ -411,7 +411,7 @@ class BPLMajorAxis(LensProfileBase):
                     s2 = s * 1.0
                     aks = s2 - (s2 - s1) ** 2.0 / ((s2 - s1) - (s1 - s0))
             else:
-                # 注意：原实现中这里引用 sel；保持原样不改动逻辑
+                
                 h[sel] = zel2[sel] ** b * self.exhyp2f1(0.5, b, b + 1, c1[sel]) / b
                 s0 = s1 * 1.0
                 s1 = s2 * 1.0
@@ -465,7 +465,7 @@ class BPLMajorAxis(LensProfileBase):
                     s2 = s * 1.0
                     aks = s2 - (s2 - s1) ** 2.0 / ((s2 - s1) - (s1 - s0))
             else:
-                # 注意：原实现中这里引用 sel；保持原样不改动逻辑
+                
                 h[sel] = zel2[sel] ** b * self.exhyp2f1(0.5, b, b + 1, c1[sel]) * (b - 0.5) / b
                 s0 = s1 * 1.0
                 s1 = s2 * 1.0
