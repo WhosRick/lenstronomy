@@ -114,11 +114,94 @@ class BPL(LensProfileBase):
         f_yy = kappa - gamma1
         f_xy = gamma2
         return f_xx, f_xy, f_xy, f_yy
+        
+    def Beta_func(self, a):
+        return beta(1 / 2, (a - 1) / 2)
+        
 
-    # def mass_3d_lens(self, r, theta_E, gamma, e1=None, e2=None):
-    #     return self.spp.mass_3d_lens(r, theta_E, gamma)
-    # def density_lens(self, r, theta_E, gamma, e1=None, e2=None):
-    #     return self.spp.density_lens(r, theta_E, gamma)
+    def rho_c_from_b(self, b, a, r_c, sigma_crit=1.0):
+        """
+        Compute ρ_c from (b, a, r_c) using Du+2020 Eq. (8), in lens units.
+
+        b^(a-1) = B(a)/Sigma_crit * 2/(3-a) * ρ_c * r_c^a
+
+        => ρ_c = (3-a) / (2 * B(a)) * Sigma_crit * b^(a-1) / r_c^a
+        """
+        B_a = self.Beta_func(a)
+        rho_c = (3.0 - a) * sigma_crit * b ** (a - 1.0) / (2.0 * B_a * r_c ** a)
+        return rho_c
+
+
+    def mass_3d_lens(self, r, b, a, a_c, r_c, sigma_crit=1.0, e1=None, e2=None):
+        """
+        3D enclosed mass M(<r) for the BPL model, using lens parameters.
+
+        Inputs
+        ------
+        r         : float or array, 3D radius
+        b         : scale radius b (Du+2020,2023)
+        a         : outer 3D slope α
+        a_c       : inner 3D slope α_c
+        r_c       : break radius r_c
+        sigma_crit: Σ_crit (if you work in lens units, just use 1.)
+
+        Returns
+        -------
+        M : float or array, 3D mass inside radius r
+        """
+        r = np.asarray(r, dtype=float)
+
+        # from (b, a, r_c) to ρ_c
+        rho_c = self.rho_c_from_b(b, a, r_c, sigma_crit=sigma_crit)
+
+        # allocate output
+        M = np.zeros_like(r, dtype=float)
+
+        # sanity checks
+        if np.isclose(3.0 - a_c, 0.0):
+            raise ValueError("a_c = 3 causes divergent inner mass.")
+        if np.isclose(3.0 - a, 0.0):
+            raise ValueError("a = 3 causes divergent outer mass.")
+
+        # masks
+        inner = r <= r_c
+        outer = ~inner
+
+        # r <= r_c : inner slope α_c
+        if np.any(inner):
+            r_in = r[inner]
+            M[inner] = (
+                4.0 * np.pi * rho_c
+                * r_c ** a_c
+                * r_in ** (3.0 - a_c)
+                / (3.0 - a_c)
+            )
+
+        # r >= r_c : outer slope α, plus constant m0
+        if np.any(outer):
+            r_out = r[outer]
+
+            # Du+2020 Eq. (3):
+            # m0 = - 4π ρ_c / (3-α) * (α - α_c)/(3-α_c) * r_c^3
+            m0 = (
+                -4.0 * np.pi * rho_c
+                * (a - a_c)
+                * r_c ** 3
+                / ((3.0 - a) * (3.0 - a_c))
+            )
+
+            M[outer] = (
+                4.0 * np.pi * rho_c
+                * r_c ** a
+                * r_out ** (3.0 - a)
+                / (3.0 - a)
+                + m0
+            )
+
+        return M
+
+    #def density_lens(self, r, theta_E, gamma, e1=None, e2=None):
+    #     return self.density_lens(r, theta_E, gamma)
 
 
 class BPLMajorAxis(LensProfileBase):
