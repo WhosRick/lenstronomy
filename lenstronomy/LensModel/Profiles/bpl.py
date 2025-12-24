@@ -119,20 +119,20 @@ class BPL(LensProfileBase):
         return beta(1 / 2, (a - 1) / 2)
         
 
-    def rho_c_from_b(self, b, a, r_c, sigma_crit=1.0):
+    def rho_c_from_b(self, b, a, r_c):
         """
         Compute ρ_c from (b, a, r_c) using Du+2020 Eq. (8), in lens units.
 
-        b^(a-1) = B(a)/Sigma_crit * 2/(3-a) * ρ_c * r_c^a
+        b^(a-1) = B(a) * 2/(3-a) * ρ_c * r_c^a
 
-        => ρ_c = (3-a) / (2 * B(a)) * Sigma_crit * b^(a-1) / r_c^a
+        => ρ_c = (3-a) / (2 * B(a)) * b^(a-1) / r_c^a
         """
         B_a = self.Beta_func(a)
-        rho_c = (3.0 - a) * sigma_crit * b ** (a - 1.0) / (2.0 * B_a * r_c ** a)
+        rho_c = (3.0 - a) * b ** (a - 1.0) / (2.0 * B_a * r_c ** a)
         return rho_c
 
 
-    def mass_3d_lens(self, r, b, a, a_c, r_c, sigma_crit=1.0, e1=None, e2=None):
+    def mass_3d_lens(self, r, b, a, a_c, r_c, e1=None, e2=None):
         """
         3D enclosed mass M(<r) for the BPL model, using lens parameters.
 
@@ -143,7 +143,6 @@ class BPL(LensProfileBase):
         a         : outer 3D slope α
         a_c       : inner 3D slope α_c
         r_c       : break radius r_c
-        sigma_crit: Σ_crit (if you work in lens units, just use 1.)
 
         Returns
         -------
@@ -152,7 +151,7 @@ class BPL(LensProfileBase):
         r = np.asarray(r, dtype=float)
 
         # from (b, a, r_c) to ρ_c
-        rho_c = self.rho_c_from_b(b, a, r_c, sigma_crit=sigma_crit)
+        rho_c = self.rho_c_from_b(b, a, r_c)
 
         # allocate output
         M = np.zeros_like(r, dtype=float)
