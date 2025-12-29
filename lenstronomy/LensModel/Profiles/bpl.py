@@ -258,13 +258,16 @@ class BPLMajorAxis(LensProfileBase):
         alpha1 = base1 * pow_a * H_a
 
         # alpha2（core）
-        C = (r_c * r_c) * U
-        F_ac = self.F((3.0 - a_c) / 2.0, C)
-        F_a3 = self.F((3.0 - a) / 2.0, C)
-        S0_arr = self.S0(a, a_c, C, R_el_safe, r_c, target_precision=1e-6)
+        if r_c != 0 and a != a_c:
+            C = (r_c * r_c) * U
+            F_ac = self.F((3.0 - a_c) / 2.0, C)
+            F_a3 = self.F((3.0 - a) / 2.0, C)
+            S0_arr = self.S0(a, a_c, C, R_el_safe, r_c, target_precision=1e-6)
 
-        pref2 = (r_c * r_c) * invZ * (3.0 - a) / Beta_a * (b / r_c) ** (a - 1.0)
-        alpha2 = pref2 * (2.0 / (3.0 - a_c) * F_ac - 2.0 / (3.0 - a) * F_a3 - S0_arr)
+            pref2 = (r_c * r_c) * invZ * (3.0 - a) / Beta_a * (b / r_c) ** (a - 1.0)
+            alpha2 = pref2 * (2.0 / (3.0 - a_c) * F_ac - 2.0 / (3.0 - a) * F_a3 - S0_arr)
+        else:
+            alpha2 = 0.0
 
         alpha = alpha1 + alpha2
 
@@ -357,7 +360,7 @@ class BPLMajorAxis(LensProfileBase):
 
     def F(self, a, z):
         if a == 0.5:
-            return (spence(1 - np.sqrt(z)) - spence(1 - np.sqrt(-z))) / np.sqrt(z) / 2
+            return (spence(1 - np.sqrt(z)) - spence(1 + np.sqrt(z))) / np.sqrt(z) / 2
         else:
             return (1 / (1 - 2 * a)) * (hyp2f1(a, 1, a + 1, z) - 2 * a * hyp2f1(0.5, 1, 1.5, z))
 
@@ -376,7 +379,7 @@ class BPLMajorAxis(LensProfileBase):
             R_el = np.array([R_el])
         result = C * 0
         sel = np.where(R_el < r_c)
-        if len(sel[0]) > 0 and sel[0][0] != 0:
+        if len(sel[0]) > 0 :
             zel2 = 1.0 - (R_el[sel] / r_c) ** 2
             cc = C[sel]
             result[sel] = self.s0arr(a, a_c, zel2, cc, target_precision)
@@ -495,7 +498,7 @@ class BPLMajorAxis(LensProfileBase):
             R_el = np.array([R_el])
         result = C * 0
         sel = np.where(R_el < r_c)
-        if len(sel[0]) > 0 and sel[0][0] != 0:
+        if len(sel[0]) > 0 :
             zel2 = 1.0 - (R_el[sel] / r_c) ** 2
             cc = C[sel]
             result[sel] = self.s2arr(a, a_c, zel2, cc, target_precision)
