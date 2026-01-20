@@ -198,9 +198,10 @@ class BPL(LensProfileBase):
             )
 
         return M
-
-    #def density_lens(self, r, theta_E, gamma, e1=None, e2=None):
-    #     return self.density_lens(r, theta_E, gamma)
+    
+    # TODO
+    #def density_lens(self, r, b, a, a_c, r_c, e1=None, e2=None):
+    #     return self.density_lens(r, b, a, a_c, r_c)
 
 
 class BPLMajorAxis(LensProfileBase):
@@ -379,7 +380,7 @@ class BPLMajorAxis(LensProfileBase):
             R_el = np.array([R_el])
         result = C * 0
         sel = np.where(R_el < r_c)
-        if len(sel[0]) > 0 :
+        if len(sel[0]) > 0 and sel[0][0] != 0:
             zel2 = 1.0 - (R_el[sel] / r_c) ** 2
             cc = C[sel]
             result[sel] = self.s0arr(a, a_c, zel2, cc, target_precision)
@@ -498,7 +499,7 @@ class BPLMajorAxis(LensProfileBase):
             R_el = np.array([R_el])
         result = C * 0
         sel = np.where(R_el < r_c)
-        if len(sel[0]) > 0 :
+        if len(sel[0]) > 0 and sel[0][0] != 0:
             zel2 = 1.0 - (R_el[sel] / r_c) ** 2
             cc = C[sel]
             result[sel] = self.s2arr(a, a_c, zel2, cc, target_precision)
