@@ -1,3 +1,6 @@
+__author__ = "rgh (adapted from sibirrer test_epl)"
+
+
 import numpy as np
 import pytest
 import warnings
