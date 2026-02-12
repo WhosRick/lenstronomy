@@ -862,7 +862,7 @@ class TestNumericsProfile(object):
         self.assert_differentials(lens_model, kwargs, diff=2e-3, decimal=1)
 
     def test_bpl(self):
-    
+
         kwargs = {
             "b": 2.5,
             "a": 2.1,
@@ -872,12 +872,12 @@ class TestNumericsProfile(object):
             "e2": 0.2,
             "center_x": 0.0,
             "center_y": 0.0,
-            "target_precision":1e-5, 
-            "maxiter":2000,
+            "target_precision": 1e-5,
+            "maxiter": 2000,
         }
         lens_model = ["BPL"]
         self.assert_differentials(lens_model, kwargs, diff=2e-3, decimal=1)
-        
+
         kwargs = {
             "b": 1.2,
             "a": 1.1,
@@ -887,12 +887,12 @@ class TestNumericsProfile(object):
             "e2": 0.1,
             "center_x": 0.0,
             "center_y": 0.0,
-            "target_precision":1e-5, 
-            "maxiter":2000,
+            "target_precision": 1e-5,
+            "maxiter": 2000,
         }
         lens_model = ["BPL"]
         self.assert_differentials(lens_model, kwargs, diff=2e-3, decimal=1)
-  
+
         kwargs = {
             "b": 1.2,
             "a": 1.1,
@@ -902,12 +902,12 @@ class TestNumericsProfile(object):
             "e2": 0.1,
             "center_x": 0.0,
             "center_y": 0.0,
-            "target_precision":1e-5, 
-            "maxiter":1000,
+            "target_precision": 1e-5,
+            "maxiter": 1000,
         }
         lens_model = ["BPL"]
-        self.assert_differentials(lens_model, kwargs, diff=1e-6, decimal=3)  
-        
+        self.assert_differentials(lens_model, kwargs, diff=1e-6, decimal=3)
+
         kwargs = {
             "b": 2.5,
             "a": 2.1,
@@ -917,8 +917,8 @@ class TestNumericsProfile(object):
             "e2": 0.2,
             "center_x": 0.0,
             "center_y": 0.0,
-            "target_precision":1e-12, 
-            "maxiter":4000,
+            "target_precision": 1e-12,
+            "maxiter": 4000,
         }
         lens_model = ["BPL"]
         self.assert_differentials(lens_model, kwargs, diff=1e-6, decimal=3)
@@ -935,5 +935,3 @@ class TestNumericsProfile(object):
         }
         lens_model = ["BPL"]
         self.assert_differentials(lens_model, kwargs, diff=2e-3, decimal=1)
-
-

@@ -54,7 +54,6 @@ class TestBPLInternals(object):
             # f__xx, f__xy, f__yx, f__yy
             return 2.0, 0.3, 0.3, 1.0
 
-
         monkeypatch.setattr(self.major, "hessian", _fake_major_hessian)
 
         # Choose a non-trivial orientation so rotation code still runs
@@ -201,9 +200,9 @@ class TestBPLInternals(object):
         )
         _assert_finite_complex(out)
 
-    
     def test_resolve_settings_defaults_and_overrides(self):
-        """Cover BPLMajorAxis._resolve_settings, which controls target_precision and maxiter."""
+        """Cover BPLMajorAxis._resolve_settings, which controls target_precision and
+        maxiter."""
         tp, mi = self.major._resolve_settings(target_precision=None, maxiter=None)
         assert tp == self.major._target_precision
         assert mi == self.major._maxiter
@@ -224,8 +223,12 @@ class TestBPLInternals(object):
         R_el = np.array(0.3 * r_c)
         C = np.array(0.8)
 
-        out0 = self.major.S0(a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=50)
-        out2 = self.major.S2(a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=50)
+        out0 = self.major.S0(
+            a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=50
+        )
+        out2 = self.major.S2(
+            a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=50
+        )
 
         _assert_finite_complex(out0)
         _assert_finite_complex(out2)
@@ -238,8 +241,12 @@ class TestBPLInternals(object):
         R_el = np.array([0.3 * r_c, 1.2 * r_c])
         C = np.array([0.8, 0.8])
 
-        out0 = self.major.S0(a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=60)
-        out2 = self.major.S2(a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=60)
+        out0 = self.major.S0(
+            a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=60
+        )
+        out2 = self.major.S2(
+            a=a, a_c=a_c, C=C, R_el=R_el, r_c=r_c, target_precision=1e-3, maxiter=60
+        )
 
         out0 = np.asarray(out0)
         out2 = np.asarray(out2)
@@ -258,14 +265,21 @@ class TestBPLInternals(object):
         "target_precision,maxiter",
         [(None, None), (1e-3, 30), (1e-5, 80)],
     )
-    def test_user_overrides_precision_and_maxiter_do_not_crash(self, target_precision, maxiter):
-        """Ensure new knobs (target_precision/maxiter) are threaded through derivatives/hessian."""
+    def test_user_overrides_precision_and_maxiter_do_not_crash(
+        self, target_precision, maxiter
+    ):
+        """Ensure new knobs (target_precision/maxiter) are threaded through
+        derivatives/hessian."""
         kwargs = self._kwargs_bpl(b=1.1, a=2.2, a_c=1.7, r_c=0.6, q=0.75, phi_G=0.5)
         x = np.array([0.2, 0.9, 1.4])
         y = np.array([0.1, 0.3, -0.2])
 
-        fx, fy = self.bpl.derivatives(x, y, target_precision=target_precision, maxiter=maxiter, **kwargs)
-        f_xx, f_xy, f_yx, f_yy = self.bpl.hessian(x, y, target_precision=target_precision, maxiter=maxiter, **kwargs)
+        fx, fy = self.bpl.derivatives(
+            x, y, target_precision=target_precision, maxiter=maxiter, **kwargs
+        )
+        f_xx, f_xy, f_yx, f_yy = self.bpl.hessian(
+            x, y, target_precision=target_precision, maxiter=maxiter, **kwargs
+        )
 
         _finite([fx, fy, f_xx, f_xy, f_yx, f_yy])
 
@@ -279,7 +293,7 @@ class TestBPLInternals(object):
         )
         _finite([f_xx, f_xy, f_yx, f_yy])
         npt.assert_allclose(f_xy, f_yx, atol=1e-12, rtol=0.0)
-        
+
     def test_F_hits_a_half_branch(self):
         # Cover F(a,z) special branch a==0.5 (spence-based)
         z = 0.3  # keep within (0,1) to avoid branch cut issues
@@ -291,8 +305,6 @@ class TestBPLInternals(object):
         out = self.major.kappa2func(b=1.0, a=2.0, a_c=2.0, r_c=1.0, R_el=0.5)
         assert out == 0.0
         assert isinstance(out, float)
-
-
 
 
 class TestBPLvsEPL(object):
@@ -472,4 +484,3 @@ class TestBPLvsEPL(object):
 
 if __name__ == "__main__":
     pytest.main()
-
